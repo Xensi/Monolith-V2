@@ -16,12 +16,7 @@ public class PlayerMovement : MonoBehaviour
 
     Vector3 velocity;
 
-    public float jumpHeight = 3f;
-
-    void Start()
-    {
-        
-    } 
+    public float jumpHeight = 3f; 
     void Update()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
@@ -29,8 +24,7 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded && velocity.y < 0)
         {
             velocity.y = -2f; //negative to force onto ground
-        }
-
+        } 
 
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
@@ -41,7 +35,6 @@ public class PlayerMovement : MonoBehaviour
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity); //some physics equation for velocity needed to jump a height
         }
-
 
         //gravity
         velocity.y += gravity * Time.deltaTime;
