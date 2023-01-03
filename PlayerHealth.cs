@@ -31,7 +31,7 @@ public class PlayerHealth : MonoBehaviour
 
     private void Die()
     {
-        movementScript.speed = 0;
+        movementScript.defaultSpeed = 0;
     }
 
 }

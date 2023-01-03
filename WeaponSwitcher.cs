@@ -5,11 +5,25 @@ using UnityEngine;
 public class WeaponSwitcher : MonoBehaviour
 {
     public int selectedWeapon = 0;
+    public Gun activeWeapon;
 
     public List<UnlockedWeapon> unlockedWeapons;
+    public List<Gun> gunList;
 
     private int previousWeapon;
-
+    public static WeaponSwitcher Instance { get; private set; }
+    private void Awake()
+    {
+        // If there is an instance, and it's not me, delete myself. 
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
     private void Start()
     {
         SelectWeapon();
@@ -50,10 +64,37 @@ public class WeaponSwitcher : MonoBehaviour
         if (previousWeapon != selectedWeapon)
         {
             SelectWeapon();
-        }
-
+        } 
     }
-    void SelectWeapon()
+    public void UnlockWeapon(int id)
+    {
+        unlockedWeapons[id].unlocked = true;
+        gunList[id].PlayReloadSound();
+    }
+    public void SelectWeaponWithID(int id)
+    {
+        int i = 0;
+        foreach (Transform weapon in transform)
+        {
+            if (i == id)
+            {
+                weapon.gameObject.SetActive(true);
+                activeWeapon = gunList[id];
+                Recoil.Instance.UpdateRecoilValues();
+                Jolt.Instance.UpdateJoltValues();
+            }
+            else
+            {
+                weapon.gameObject.SetActive(false);
+            }
+            i++;
+        }
+    }
+    public void AddSpareAmmo(int ammo, int id)
+    {
+        gunList[id].spareAmmo += ammo;
+    }
+    public void SelectWeapon()
     {
         int i = 0;
         foreach (Transform weapon in transform)
@@ -61,6 +102,9 @@ public class WeaponSwitcher : MonoBehaviour
             if (i == selectedWeapon)
             {
                 weapon.gameObject.SetActive(true);
+                activeWeapon = gunList[selectedWeapon];
+                Recoil.Instance.UpdateRecoilValues();
+                Jolt.Instance.UpdateJoltValues();
             }
             else
             {

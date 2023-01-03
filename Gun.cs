@@ -6,11 +6,24 @@ public class Gun : MonoBehaviour
 {
     public float bulletDamage = 1;
     public int bulletsPerShot = 1;
-    public float firingFrequency = 0.1f; 
+    public float firingFrequency = 0.1f;
+    //public float firingFrequencyIncreasePerBullet = 0f; //speed up over time?
+    //public float minimumFiringFrequency = 0.01f;
+
+    public float recoilX = -2; //up/down
+    public float recoilY = 2;
+    public float recoilZ = 0.35f;
+
+    public float joltX = -25; //up/down
+    public float joltY = 2;
+    public float joltZ = 2;
+    public float joltReturnSpeed = 100;
+
     public bool coolingDown = false;
     public float spreadRange = 0.01f;
+    //public float spreadIncreasePerBullet = 0;
     public float range = 1000;
-    public float bulletForce = 1;
+    public float bulletForce = 100;
     public ParticleSystem muzzleFlash;
     public ParticleSystem impactEffect;
     public List<AudioClip> shootSounds;
@@ -25,7 +38,7 @@ public class Gun : MonoBehaviour
     public AudioClip reloadSound;
 
     public bool reloading = false;
-    //public LayerMask excludePlayerMask;
+    public LayerMask canHitLayerMask;
 
     public enum FiringType
     {
@@ -62,18 +75,29 @@ public class Gun : MonoBehaviour
                 }
             }
         } 
-    } 
+    }
+
+    public GameObject crosshair;
+    private void OnEnable()
+    {
+        if (crosshair != null) crosshair.SetActive(true);
+    }
     private void OnDisable()
     {
         reloading = false;
+        if (crosshair != null) crosshair.SetActive(false);
     }
     void Reload()
     {
         reloading = true;
-        weaponAudioSource.clip = reloadSound;
-        weaponAudioSource.PlayOneShot(reloadSound, 1f);
+        PlayReloadSound();
 
         Invoke("FinishReload", reloadTime);
+    }
+    public void PlayReloadSound()
+    { 
+        weaponAudioSource.clip = reloadSound;
+        weaponAudioSource.PlayOneShot(reloadSound, 1f);
     }
     void FinishReload()
     {
@@ -87,20 +111,25 @@ public class Gun : MonoBehaviour
     void Shoot()
     {
         currentAmmo -= ammoDrainPerShot;
-        for (int i = 0; i < bulletsPerShot; i++)
+
+        Recoil.Instance.RecoilFire();
+        Jolt.Instance.FireJolt();
+
+        for (int i = 0; i < bulletsPerShot; i++) //fire bullets
         {
             Vector3 shootDirection = transform.forward + transform.TransformDirection(new Vector3(Random.Range(-spreadRange, spreadRange), Random.Range(-spreadRange, spreadRange))); 
             Ray ray = new Ray(transform.position, shootDirection);
             RaycastHit hit; //otherwise, make raycast
 
-            if (Physics.Raycast(ray, out hit, range)) //if raycast hits something //~excludePlayerMask
+            if (Physics.Raycast(ray, out hit, range, canHitLayerMask)) //if raycast hits something  
             {
                 ParticleSystem hitParticleEffect = Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal)); //create a particle effect on shot
-                Destroy(hitParticleEffect, 2);
+                Destroy(hitParticleEffect.gameObject, 2);
 
                 if (hit.rigidbody != null) //shooting rigidbodies pushes them because it's fun
                 {
                     hit.rigidbody.AddForceAtPosition(shootDirection * bulletForce, hit.point);
+                    //hit.rigidbody.AddForce(-hit.normal * bulletForce);
                 }
 
                 EnemyHealth enemy = hit.transform.GetComponent<EnemyHealth>(); //get target component 

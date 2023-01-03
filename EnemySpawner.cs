@@ -8,20 +8,45 @@ public class EnemySpawner : MonoBehaviour
 
     public Collider spawnBounds;
 
-    public GameObject enemyPrefab;
+    public List<EnemyChance> enemyList;
 
     public Transform player;
+
+    //public float enemiesToSpawn;
+
+    public float timeElapsed;
+
     void Start()
     {
-        InvokeRepeating("EnemySpawnTimer", 0, 2);
-    } 
-
+        InvokeRepeating("EnemySpawnTimer", 0, 10);
+    }
+    private void Update()
+    {
+        timeElapsed += Time.deltaTime; 
+        //enemiesToSpawn = Mathf.Ceil(0.5f * Mathf.Log(timeElapsed));
+    }
     private void EnemySpawnTimer()
+    {
+        /*for (int i = 0; i < enemiesToSpawn; i++)
+        {
+            SpawnEnemy();
+        }*/
+        foreach (EnemyChance chance in enemyList)
+        {
+            GameObject prefab = chance.enemyPrefab;
+            int num = chance.numberToSpawn;
+            for (int i = 0; i < num; i++)
+            {
+                SpawnEnemy(prefab);
+            }
+        }
+    }
+    private void SpawnEnemy(GameObject prefab)
     {
         spawnBounds.enabled = true;
         Vector3 point = RandomPointInBounds(spawnBounds.bounds);
         spawnBounds.enabled = false;
-        GameObject enemy = Instantiate(enemyPrefab, point, Quaternion.identity);
+        GameObject enemy = Instantiate(prefab, point, Quaternion.identity);
         AIDestinationSetter pathSetter = enemy.GetComponent<AIDestinationSetter>();
         pathSetter.target = player;
     }
