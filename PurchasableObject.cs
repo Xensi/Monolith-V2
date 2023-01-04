@@ -19,6 +19,8 @@ public class PurchasableObject : MonoBehaviour
     public int healthToAdd = 0;
     public bool playerCloseEnough = false;
 
+    public GameObject doorToOpen;
+
 
     private void OnTriggerEnter(Collider other)
     {

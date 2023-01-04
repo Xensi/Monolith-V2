@@ -59,6 +59,10 @@ public class PlayerCredits : MonoBehaviour
                     PlayerHealth.Instance.health += nearObject.healthToAdd;
                     break;
                 case PurchasableObject.PurchaseType.Door:
+                    PlayerUI.Instance.ShowHidePurchaseUI(false);
+                    Destroy(nearObject.doorToOpen);
+                    Destroy(nearObject.gameObject);
+                    nearObject = null;
                     break;
                 default:
                     break;

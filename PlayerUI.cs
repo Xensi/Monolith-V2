@@ -10,6 +10,7 @@ public class PlayerUI : MonoBehaviour
     public TMP_Text ammoText;
     public TMP_Text creditsText;
     public TMP_Text healthText;
+    public TMP_Text deathText;
     public static PlayerUI Instance { get; private set; }
     private void Awake()
     {
@@ -22,6 +23,10 @@ public class PlayerUI : MonoBehaviour
         {
             Instance = this;
         }
+    }
+    public void ShowDeath()
+    {
+        deathText.gameObject.SetActive(true);
     }
     public void ShowHidePurchaseUI(bool val, string weaponName = "null", int cost = 0)
     { 
@@ -37,6 +42,7 @@ public class PlayerUI : MonoBehaviour
                     purchaseObjectText.text = cost + ": " + PlayerCredits.Instance.nearObject.healthToAdd + "HP";
                     break;
                 case PurchasableObject.PurchaseType.Door:
+                    purchaseObjectText.text = cost + ": Open " + weaponName;
                     break;
                 default:
                     break;

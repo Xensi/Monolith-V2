@@ -143,7 +143,7 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: 92d35fe1c59bbd14eaee9e3d3b54cea7, type: 3}
     - target: {fileID: 8299882, guid: e70d017eef4c3d84b89321ac7412af25, type: 3}
       propertyPath: m_PlayOnAwake
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []

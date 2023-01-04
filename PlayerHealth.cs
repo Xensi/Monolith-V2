@@ -32,6 +32,7 @@ public class PlayerHealth : MonoBehaviour
     private void Die()
     {
         movementScript.defaultSpeed = 0;
+        PlayerUI.Instance.ShowDeath();
     }
 
 }

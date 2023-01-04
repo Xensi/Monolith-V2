@@ -16,14 +16,23 @@ public class EnemySpawner : MonoBehaviour
 
     public float timeElapsed;
 
+    public float timeToSpawn = 15;
+    public float gracePeriod = 5;
+    public float difficultyTime = 60;
+
     void Start()
     {
-        InvokeRepeating("EnemySpawnTimer", 0, 10);
+        InvokeRepeating("EnemySpawnTimer", gracePeriod, timeToSpawn);
+        InvokeRepeating("DifficultyIncrease", difficultyTime, difficultyTime);
     }
     private void Update()
     {
         timeElapsed += Time.deltaTime; 
         //enemiesToSpawn = Mathf.Ceil(0.5f * Mathf.Log(timeElapsed));
+    }
+    private void DifficultyIncrease()
+    {
+        enemyList[Random.Range(0, enemyList.Count)].numberToSpawn++;
     }
     private void EnemySpawnTimer()
     {

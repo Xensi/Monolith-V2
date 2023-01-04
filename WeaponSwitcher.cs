@@ -11,7 +11,10 @@ public class WeaponSwitcher : MonoBehaviour
     public List<Gun> gunList;
 
     private int previousWeapon;
+    public LayerMask canHitLayerMask;
     public static WeaponSwitcher Instance { get; private set; }
+
+    public bool firing = false;
     private void Awake()
     {
         // If there is an instance, and it's not me, delete myself. 

@@ -53,8 +53,8 @@ public class AltWeaponSway : MonoBehaviour
         lastPos = controller.transform.position;
     }
     private void Sway()
-    {  
-        if (PlayerMovement.Instance.isGrounded)
+    {
+        if (!WeaponSwitcher.Instance.firing && PlayerMovement.Instance.isGrounded)
         {
             timer += Time.deltaTime;
 

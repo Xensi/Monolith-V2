@@ -17,6 +17,18 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 410510, guid: 47a6eaf00da4f324a9167c487dff2f4c, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 410510, guid: 47a6eaf00da4f324a9167c487dff2f4c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 410510, guid: 47a6eaf00da4f324a9167c487dff2f4c, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 410510, guid: 47a6eaf00da4f324a9167c487dff2f4c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -55,6 +67,10 @@ PrefabInstance:
     - target: {fileID: 410510, guid: 47a6eaf00da4f324a9167c487dff2f4c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 410510, guid: 47a6eaf00da4f324a9167c487dff2f4c, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8291036, guid: 47a6eaf00da4f324a9167c487dff2f4c, type: 3}
       propertyPath: m_PlayOnAwake

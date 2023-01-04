@@ -23,7 +23,10 @@ public class EnemyAttack : MonoBehaviour
     public float attackDistance = 0.5f;
     public LayerMask playerMask;
     public float attackDamage = 30f; //melee only
-     
+    public AudioSource movingSource;
+    public AudioSource attackSource;
+    public AudioClip attackSound;
+
     void Update()
     {
         if (!attackCooling)
@@ -47,7 +50,6 @@ public class EnemyAttack : MonoBehaviour
                 PlayerHealth.Instance.TakeDamage(attackDamage);
                 break;
             case AttackType.Projectile:
-                 
                 Vector3 startPoint;
                 if (shootPoint != null)
                 {
@@ -69,8 +71,14 @@ public class EnemyAttack : MonoBehaviour
             default:
                 break;
         }
+        PlayAttackSound();
         attackCooling = true;
         Invoke("AttackCooldownFinishes", attackCooldownTime);
+    }
+
+    private void PlayAttackSound()
+    {
+        attackSource.PlayOneShot(attackSound, 1);
     }
     void AttackCooldownFinishes()
     {
