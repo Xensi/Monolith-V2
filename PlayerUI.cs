@@ -44,6 +44,9 @@ public class PlayerUI : MonoBehaviour
                 case PurchasableObject.PurchaseType.Door:
                     purchaseObjectText.text = cost + ": Open " + weaponName;
                     break;
+                case PurchasableObject.PurchaseType.MysteryBox:
+                    purchaseObjectText.text = "E - Access random weapon for " + cost + " credits";
+                    break;
                 default:
                     break;
             } 

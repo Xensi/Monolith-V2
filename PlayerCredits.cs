@@ -1,13 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerCredits : MonoBehaviour
 { 
     public int credits = 0;
 
-    public PurchasableObject nearObject;
-
+    public PurchasableObject nearObject; 
     public static PlayerCredits Instance { get; private set; }
     public AudioSource creditAudio;
     private void Awake()
@@ -21,8 +18,7 @@ public class PlayerCredits : MonoBehaviour
         {
             Instance = this;
         }
-    }
-
+    } 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.E) && nearObject != null)
@@ -35,7 +31,7 @@ public class PlayerCredits : MonoBehaviour
         creditAudio.clip = clip;
         creditAudio.PlayOneShot(clip, 1);
     }
-    private void AddCredits(int amount)
+    public void AddCredits(int amount)
     {
         credits += amount;
     }
@@ -48,12 +44,8 @@ public class PlayerCredits : MonoBehaviour
             switch (nearObject.type)
             {
                 case PurchasableObject.PurchaseType.Weapon:
-                    if (!WeaponSwitcher.Instance.unlockedWeapons[nearObject.unlockWeaponID].unlocked)
-                    {
-                        WeaponSwitcher.Instance.SelectWeaponWithID(nearObject.unlockWeaponID);
-                        WeaponSwitcher.Instance.UnlockWeapon(nearObject.unlockWeaponID);
-                    }
-                    WeaponSwitcher.Instance.AddSpareAmmo(nearObject.ammoToAdd, nearObject.unlockWeaponID);
+                    int id = nearObject.unlockWeaponID;
+                    AddGun(id);
                     break;
                 case PurchasableObject.PurchaseType.Health:
                     PlayerHealth.Instance.health += nearObject.healthToAdd;
@@ -64,6 +56,11 @@ public class PlayerCredits : MonoBehaviour
                     Destroy(nearObject.gameObject);
                     nearObject = null;
                     break;
+                case PurchasableObject.PurchaseType.MysteryBox:
+                    int random = Random.Range(0, nearObject.weaponIDsToSelectRandomly.Count);
+                    int randID = nearObject.weaponIDsToSelectRandomly[random];
+                    AddGun(randID);
+                    break;
                 default:
                     break;
             }
@@ -73,5 +70,14 @@ public class PlayerCredits : MonoBehaviour
         {
             return false;
         }
+    }
+    private void AddGun(int id) //adds a new gun and switches to it or gives you ammo if you already have it
+    {
+        if (!WeaponSwitcher.Instance.unlockedWeapons[id].unlocked)
+        {
+            WeaponSwitcher.Instance.SelectWeaponWithID(id);
+            WeaponSwitcher.Instance.UnlockWeapon(id);
+        }
+        WeaponSwitcher.Instance.AddSpareAmmo(WeaponSwitcher.Instance.gunList[id].spareAmmoWhenTakenFromBox, id);
     }
 }

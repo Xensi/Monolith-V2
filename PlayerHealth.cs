@@ -5,7 +5,8 @@ using TMPro;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public float health = 100f;
+    public float health = 100;
+    public float maxHealth = 100;
     public PlayerMovement movementScript;
     public static PlayerHealth Instance { get; private set; }
     private void Awake()
@@ -28,7 +29,11 @@ public class PlayerHealth : MonoBehaviour
             Die();
         }
     }
-
+    public void RaiseHealth(float gain)
+    {
+        health += gain;
+        health = Mathf.Clamp(health, 0, maxHealth);
+    }
     private void Die()
     {
         movementScript.defaultSpeed = 0;

@@ -15,6 +15,9 @@ public class WeaponSwitcher : MonoBehaviour
     public static WeaponSwitcher Instance { get; private set; }
 
     public bool firing = false;
+
+    public Transform loweredPosition;
+    public Transform gunNormalPos;
     private void Awake()
     {
         // If there is an instance, and it's not me, delete myself. 
@@ -67,8 +70,82 @@ public class WeaponSwitcher : MonoBehaviour
         if (previousWeapon != selectedWeapon)
         {
             SelectWeapon();
-        } 
+        }
+        //gun inputs
+        if (Input.GetKeyDown(KeyCode.R) && activeWeapon.currentAmmo < activeWeapon.maxAmmo && activeWeapon.spareAmmo > 0 && !activeWeapon.reloading)
+        {
+            ReloadActiveWeapon();
+            return;
+        }
+        if (activeWeapon.currentAmmo > 0 && !activeWeapon.reloading)
+        {
+            switch (activeWeapon.firingType)
+            {
+                case Gun.FiringType.Single: 
+                    if (Input.GetMouseButtonDown(0) && !activeWeapon.coolingDown) //single press
+                    {
+                        activeWeapon.Shoot();
+                    }
+                    break;
+                case Gun.FiringType.Automatic:
+                    if (Input.GetMouseButton(0) && !activeWeapon.coolingDown) //held
+                    {
+                        activeWeapon.Shoot();
+                    }
+                    break;
+                case Gun.FiringType.Burst:
+                    break; 
+                default:
+                    break;
+            }  
+        }
+        else if (activeWeapon.currentAmmo <= 0 && !activeWeapon.dryFired)
+        {
+            switch (activeWeapon.firingType)
+            {
+                case Gun.FiringType.Single:
+                    if (Input.GetMouseButtonDown(0) && !activeWeapon.coolingDown) //single press
+                    {
+                        activeWeapon.DryFire();
+                    }
+                    break;
+                case Gun.FiringType.Automatic:
+                    if (Input.GetMouseButton(0) && !activeWeapon.coolingDown) //held
+                    {
+                        activeWeapon.DryFire();
+                    }
+                    break;
+                case Gun.FiringType.Burst:
+                    break;
+                default:
+                    break;
+            }
+        }
+        float halfTime = activeWeapon.reloadTime / 2; 
+        if (activeWeapon.reloading && reloadTimer < halfTime)
+        {
+            reloadTimer += Time.deltaTime;
+            float normalizedTime = reloadTimer / halfTime; // will = 1
+            transform.localPosition = Vector3.Lerp(gunNormalPos.localPosition, loweredPosition.localPosition, normalizedTime); //return to zero based on return speed 
+        }
+        else if (activeWeapon.reloading && reloadTimer >= halfTime && backwardsTimer < halfTime) //returning with lerp is very fast for some reason
+        {
+            backwardsTimer += Time.deltaTime;
+            float normalizedTime = backwardsTimer / halfTime; // will = 1
+            transform.localPosition = Vector3.Lerp(loweredPosition.localPosition, gunNormalPos.localPosition, normalizedTime); //return to zero based on return speed 
+        }
+        else if (activeWeapon.reloading && backwardsTimer >= halfTime)
+        {
+            activeWeapon.FinishReload();
+        }
     }
+    public float reloadTimer = 0;
+    public float backwardsTimer = 0;
+    private void ReloadActiveWeapon()
+    { 
+        activeWeapon.Reload();
+    }  
+      
     public void UnlockWeapon(int id)
     {
         unlockedWeapons[id].unlocked = true;

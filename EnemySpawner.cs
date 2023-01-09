@@ -5,8 +5,7 @@ using Pathfinding;
 
 public class EnemySpawner : MonoBehaviour
 {
-
-    public Collider spawnBounds;
+     
 
     public List<EnemyChance> enemyList;
 
@@ -20,6 +19,21 @@ public class EnemySpawner : MonoBehaviour
     public float gracePeriod = 5;
     public float difficultyTime = 60;
 
+    public Transform min;
+    public Transform max;
+    public static EnemySpawner Instance { get; private set; }
+    private void Awake()
+    {
+        // If there is an instance, and it's not me, delete myself. 
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
     void Start()
     {
         InvokeRepeating("EnemySpawnTimer", gracePeriod, timeToSpawn);
@@ -52,21 +66,13 @@ public class EnemySpawner : MonoBehaviour
     }
     private void SpawnEnemy(GameObject prefab)
     {
-        spawnBounds.enabled = true;
-        Vector3 point = RandomPointInBounds(spawnBounds.bounds);
-        spawnBounds.enabled = false;
-        GameObject enemy = Instantiate(prefab, point, Quaternion.identity);
-        AIDestinationSetter pathSetter = enemy.GetComponent<AIDestinationSetter>();
-        pathSetter.target = player;
+        
+        GameObject enemy = Instantiate(prefab, RandomPoint(), Quaternion.identity);
     }
-    public static Vector3 RandomPointInBounds(Bounds bounds)
+    public Vector3 RandomPoint()
     {
-        return new Vector3(
-            Random.Range(bounds.min.x, bounds.max.x),
-            Random.Range(bounds.min.y, bounds.max.y),
-            Random.Range(bounds.min.z, bounds.max.z)
-        );
+        Vector3 minPos = min.position;
+        Vector3 maxPos = max.position;
+        return new Vector3(Random.Range(minPos.x, maxPos.x), Random.Range(minPos.y, maxPos.y), Random.Range(minPos.z, maxPos.z));
     }
-
-
 }

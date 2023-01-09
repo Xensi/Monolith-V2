@@ -7,18 +7,14 @@ public class EnemyHealth : MonoBehaviour
     public float health = 100;
     public GameObject parent;
 
-    public GameObject itemToDrop;
-    public void TakeDamage(float damage)
+    public List<GameObject> itemsToDrop;
+
+    public GameObject deathEffect;
+
+    public void Die()
     {
-        health -= damage;
-        if (health <= 0)
-        {
-            Die();
-        }
-    }
-    private void Die()
-    {
-        if (itemToDrop != null) Instantiate(itemToDrop, transform.position, Quaternion.identity);
+        Instantiate(itemsToDrop[Random.Range(0, itemsToDrop.Count)], transform.position, Quaternion.identity);
+        Instantiate(deathEffect, transform.position, Quaternion.identity);
         Destroy(parent);
     }
 }

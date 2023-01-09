@@ -9,17 +9,24 @@ public class PurchasableObject : MonoBehaviour
     {
         Weapon,
         Health,
-        Door
+        Door,
+        MysteryBox,
     }
-    public PurchaseType type;
-    public int unlockWeaponID = 0; 
-    public string displayText = "Shotgun"; 
+    [Header("All Settings")]
+    public string displayText = "Shotgun";
     public int cost = 100;
-    public int ammoToAdd = 50;
-    public int healthToAdd = 0;
     public bool playerCloseEnough = false;
+    public PurchaseType type;
 
+    [Header("Weapon Settings")]
+    public int unlockWeaponID = 0;
+    public int ammoToAdd = 50;
+    [Header("Health Settings")]
+    public int healthToAdd = 0;
+    [Header("Door Settings")]
     public GameObject doorToOpen;
+    [Header("Box Settings")]
+    public List<int> weaponIDsToSelectRandomly;
 
 
     private void OnTriggerEnter(Collider other)

@@ -27,20 +27,28 @@ public class EnemyAttack : MonoBehaviour
     public AudioSource attackSource;
     public AudioClip attackSound;
 
+    public EnemyHealth hpScript;
+
+    public EnemySensor sensorScript;
+
     void Update()
     {
-        if (!attackCooling)
-        { 
-            inRangeToAttack = Physics.CheckSphere(transform.position, attackDistance, playerMask);
-        }
-        else
+        if (hpScript.health > 0)
         {
-            inRangeToAttack = false;
+            if (!attackCooling)
+            {
+                inRangeToAttack = Physics.CheckSphere(transform.position, attackDistance, playerMask);
+            }
+            else
+            {
+                inRangeToAttack = false;
+            }
+            if (inRangeToAttack && sensorScript.IsInSight(PlayerHealth.Instance.gameObject))
+            {
+                Attack();
+            }
         }
-        if (inRangeToAttack)
-        {
-            Attack();
-        }
+        
     }
     private void Attack()
     {

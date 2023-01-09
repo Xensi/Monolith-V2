@@ -6,6 +6,10 @@ public class Jolt : MonoBehaviour
 {
     private Vector3 currentRotation;
     private Vector3 targetRotation;
+     
+    private Vector3 targetPos;
+    public Vector3 defaultPos;
+    public Vector3 push;
 
     public float joltX = -2; //up/down
     public float joltY = 2;
@@ -30,6 +34,11 @@ public class Jolt : MonoBehaviour
         targetRotation = Vector3.Lerp(targetRotation, Vector3.zero, joltReturnSpeed * Time.deltaTime);
         currentRotation = Vector3.Slerp(currentRotation, targetRotation, joltSnapSpeed * Time.fixedDeltaTime);
         transform.localRotation = Quaternion.Euler(currentRotation);
+
+
+        targetPos = Vector3.Lerp(targetPos, defaultPos, joltReturnSpeed * Time.deltaTime);
+        transform.localPosition = Vector3.Lerp(transform.localPosition, targetPos, joltSnapSpeed * Time.fixedDeltaTime);
+        
     }
     public void UpdateJoltValues()
     {
@@ -41,5 +50,6 @@ public class Jolt : MonoBehaviour
     public void FireJolt()
     {
         targetRotation += new Vector3(joltX, Random.Range(-joltY, joltY), Random.Range(-joltZ, joltZ));
+        targetPos += push;
     }
 }

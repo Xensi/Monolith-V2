@@ -216,7 +216,7 @@ PrefabInstance:
       objectReference: {fileID: 9151758169251367314, guid: 22a2335a73a79944f8ccb0b5794ca654, type: 3}
     - target: {fileID: 6139016735382474400, guid: 14cc342572d356645b2cc81601d39eb9, type: 3}
       propertyPath: attackCooldownTime
-      value: 0.2
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7780494549202942027, guid: 14cc342572d356645b2cc81601d39eb9, type: 3}

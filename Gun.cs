@@ -4,6 +4,18 @@ using UnityEngine;
 
 public class Gun : MonoBehaviour
 {
+    public enum BulletType
+    {
+        Raycast,
+        Projectile
+    }
+    public enum FiringType
+    {
+        Single,
+        Automatic,
+        Charge,
+        Burst, //not implemented  
+    }
     [Header("Cosmetic")]
     public ParticleSystem muzzleFlash;
     public ParticleSystem impactEffect;
@@ -18,7 +30,9 @@ public class Gun : MonoBehaviour
     public float spreadRange = 0.01f;
     public float range = 1000;
     public float reloadTime = 1f;
-     
+    public BulletType bulletType;
+    public FiringType firingType;
+
     [Header("Ammo Settings")]
     public int spareAmmo = 100;
     public int maxAmmo = 10;
@@ -39,54 +53,26 @@ public class Gun : MonoBehaviour
     public List<AudioClip> shootSounds;
     public AudioSource weaponAudioSource;
     public AudioClip reloadSound;
+    public AudioClip emptyFireSound;
     public float pitchVariance = 0.1f;
 
+    [Header("Box Settings")]
+    public int spareAmmoWhenTakenFromBox = 50;
+
     //Does not need to be seen
-    private bool reloading = false;
-    private bool coolingDown = false;
+    [HideInInspector] public bool reloading = false;
+    [HideInInspector] public bool coolingDown = false;
 
     //public float firingFrequencyIncreasePerBullet = 0f; //speed up over time?
     //public float minimumFiringFrequency = 0.01f;
     //public float spreadIncreasePerBullet = 0;
 
+    public bool dryFired = false;
 
-    public enum FiringType
-    {
-        Single,
-        Automatic,
-        Burst, //not implemented
-        Projectile,
-        Beam
-    }
-    public FiringType firingType;
+
     private void Start()
     {
         currentAmmo = maxAmmo; 
-    }
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.R) && currentAmmo < maxAmmo && spareAmmo > 0 && !reloading)
-        {
-            Reload();
-            return;
-        }
-        if (currentAmmo > 0 && !reloading)
-        { 
-            if (firingType == FiringType.Single || firingType == FiringType.Burst)
-            {
-                if (Input.GetButtonDown("Fire1") && !coolingDown)
-                {
-                    Shoot();
-                }
-            }
-            else
-            {
-                if (Input.GetButton("Fire1") && !coolingDown)
-                {
-                    Shoot();
-                }
-            }
-        } 
     }
 
     public GameObject crosshair;
@@ -99,19 +85,20 @@ public class Gun : MonoBehaviour
         reloading = false;
         if (crosshair != null) crosshair.SetActive(false);
     }
-    void Reload()
+    public void Reload()
     {
         reloading = true;
         PlayReloadSound();
 
-        Invoke("FinishReload", reloadTime);
+        
     }
     public void PlayReloadSound()
-    { 
-        weaponAudioSource.clip = reloadSound;
+    {
+        float defaultPitch = 1;
+        weaponAudioSource.pitch = defaultPitch + Random.Range(-pitchVariance, pitchVariance); 
         weaponAudioSource.PlayOneShot(reloadSound, 1f);
     }
-    void FinishReload()
+    public void FinishReload()
     {
         while (currentAmmo < maxAmmo && spareAmmo > 0)
         {
@@ -119,8 +106,11 @@ public class Gun : MonoBehaviour
             spareAmmo--;
         }
         reloading = false;
+        dryFired = false;
+        WeaponSwitcher.Instance.reloadTimer = 0;
+        WeaponSwitcher.Instance.backwardsTimer = 0;
     }
-    void Shoot()
+    public void Shoot(bool raycast = true)
     {
         CancelInvoke("TreatAsNotFiring");
         WeaponSwitcher.Instance.firing = true;
@@ -131,6 +121,15 @@ public class Gun : MonoBehaviour
         Recoil.Instance.RecoilFire();
         Jolt.Instance.FireJolt();
 
+        Vector3 bulletOrigin;
+        if (muzzleFlash != null)
+        {
+            bulletOrigin = muzzleFlash.transform.position;
+        }
+        else
+        {
+            bulletOrigin = transform.position;
+        }
         for (int i = 0; i < bulletsPerShot; i++) //fire bullets
         {
             Vector3 shootDirection = transform.forward + new Vector3(Random.Range(-spreadRange, spreadRange), Random.Range(-spreadRange, spreadRange), 0);
@@ -140,7 +139,7 @@ public class Gun : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit, range, WeaponSwitcher.Instance.canHitLayerMask)) //if raycast hits something  
             {
-                GameObject bullet = Instantiate(fakeBulletPrefab, muzzleFlash.transform.position, Quaternion.identity); //uses muzzle flash as starting pos
+                GameObject bullet = Instantiate(fakeBulletPrefab, bulletOrigin, Quaternion.identity); //uses muzzle flash as starting pos
                 bullet.transform.forward = shootDirection; //face direction
 
                 StartCoroutine(SpawnBulletCosmetic(bullet, hit.point, true, hit.normal)); 
@@ -151,24 +150,32 @@ public class Gun : MonoBehaviour
                     //hit.rigidbody.AddForce(-hit.normal * bulletForce);
                 }
 
-                EnemyHealth enemy = hit.transform.GetComponent<EnemyHealth>(); //get target component 
-                if (enemy != null) //if target exists
+                DamageableHitbox hitbox = hit.transform.GetComponent<DamageableHitbox>(); //get target component 
+                if (hitbox != null) //if target exists
                 {
-                    enemy.TakeDamage(bulletDamage); //call target damage function
+                    hitbox.TakeDamage(bulletDamage); //call target damage function
                 }
             }
             else //if raycast doesn't hit, still fire a fake bullet
             {
 
-                GameObject bullet = Instantiate(fakeBulletPrefab, muzzleFlash.transform.position, Quaternion.identity); //uses muzzle flash as starting pos
+                GameObject bullet = Instantiate(fakeBulletPrefab, bulletOrigin, Quaternion.identity); //uses muzzle flash as starting pos
                 StartCoroutine(SpawnBulletCosmetic(bullet, shootDirection * range, false, Vector3.zero)); 
             }
-        } 
-        muzzleFlash.Play();
+        }
+        if (muzzleFlash != null) muzzleFlash.Play();
         PlayShootSound();
 
         coolingDown = true;
         Invoke("FinishCooldown", firingFrequency);
+    }
+
+    public void DryFire()
+    {
+        float defaultPitch = 1;
+        weaponAudioSource.pitch = defaultPitch + Random.Range(-pitchVariance, pitchVariance);
+        weaponAudioSource.PlayOneShot(emptyFireSound, 1);
+        dryFired = true;
     }
     private void TreatAsNotFiring()
     {
