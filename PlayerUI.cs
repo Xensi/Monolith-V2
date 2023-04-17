@@ -69,6 +69,6 @@ public class PlayerUI : MonoBehaviour
     public void UpdateAmmoCount()
     {
         Gun gun = WeaponSwitcher.Instance.activeWeapon;
-        ammoText.text = gun.currentAmmo + "/" + gun.maxAmmo + "\n" + gun.spareAmmo;
+        ammoText.text = gun.bulletsInMag + "/" + gun.maxMagSize + "\n" + gun.spareAmmo;
     }
 }

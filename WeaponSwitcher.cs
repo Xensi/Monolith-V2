@@ -72,34 +72,50 @@ public class WeaponSwitcher : MonoBehaviour
             SelectWeapon();
         }
         //gun inputs
-        if (Input.GetKeyDown(KeyCode.R) && activeWeapon.currentAmmo < activeWeapon.maxAmmo && activeWeapon.spareAmmo > 0 && !activeWeapon.reloading)
+        if (Input.GetKeyDown(KeyCode.R) && activeWeapon.bulletsInMag < activeWeapon.maxMagSize && activeWeapon.spareAmmo > 0 && !activeWeapon.reloading)
         {
-            ReloadActiveWeapon();
+            activeWeapon.Reload();
             return;
         }
-        if (activeWeapon.currentAmmo > 0 && !activeWeapon.reloading)
+        if (Input.GetKeyDown(KeyCode.E) && activeWeapon.firingType == Gun.FiringType.PumpAction && !activeWeapon.reloading && !activeWeapon.pumpingTheAction)
+        {
+            activeWeapon.PumpAction();
+            return;
+        }
+        if (!Input.GetKey(KeyCode.E) && activeWeapon.firingType == Gun.FiringType.PumpAction && !activeWeapon.reloading && activeWeapon.pumpingTheAction && activeWeapon.pumpTimer >= activeWeapon.pullBackTime)
+        {
+            activeWeapon.ReleaseTheAction();
+            return;
+        }
+        if (activeWeapon.bulletsInMag > 0 && !activeWeapon.reloading)
         {
             switch (activeWeapon.firingType)
             {
                 case Gun.FiringType.Single: 
-                    if (Input.GetMouseButtonDown(0) && !activeWeapon.coolingDown) //single press
-                    {
+                    if (Input.GetMouseButtonDown(0) && !activeWeapon.coolingDown && activeWeapon.bulletInChamber) //single press
+                    { 
                         activeWeapon.Shoot();
                     }
                     break;
                 case Gun.FiringType.Automatic:
-                    if (Input.GetMouseButton(0) && !activeWeapon.coolingDown) //held
+                    if (Input.GetMouseButton(0) && !activeWeapon.coolingDown && activeWeapon.bulletInChamber) //held
                     {
                         activeWeapon.Shoot();
                     }
                     break;
                 case Gun.FiringType.Burst:
-                    break; 
+                    break;
+                case Gun.FiringType.PumpAction:
+                    if (Input.GetMouseButtonDown(0) && !activeWeapon.coolingDown && activeWeapon.bulletInChamber) //single press
+                    {
+                        activeWeapon.Shoot();
+                    }
+                    break;
                 default:
                     break;
             }  
         }
-        else if (activeWeapon.currentAmmo <= 0 && !activeWeapon.dryFired)
+        else if (activeWeapon.bulletsInMag <= 0 && !activeWeapon.dryFired)
         {
             switch (activeWeapon.firingType)
             {
@@ -121,7 +137,7 @@ public class WeaponSwitcher : MonoBehaviour
                     break;
             }
         }
-        float halfTime = activeWeapon.reloadTime / 2; 
+        /*float halfTime = activeWeapon.reloadTime / 2; 
         if (activeWeapon.reloading && reloadTimer < halfTime)
         {
             reloadTimer += Time.deltaTime;
@@ -137,15 +153,11 @@ public class WeaponSwitcher : MonoBehaviour
         else if (activeWeapon.reloading && backwardsTimer >= halfTime)
         {
             activeWeapon.FinishReload();
-        }
+        }*/
     }
     public float reloadTimer = 0;
-    public float backwardsTimer = 0;
-    private void ReloadActiveWeapon()
-    { 
-        activeWeapon.Reload();
-    }  
-      
+    public float backwardsTimer = 0; 
+
     public void UnlockWeapon(int id)
     {
         unlockedWeapons[id].unlocked = true;

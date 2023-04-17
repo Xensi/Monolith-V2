@@ -14,7 +14,8 @@ public class Gun : MonoBehaviour
         Single,
         Automatic,
         Charge,
-        Burst, //not implemented  
+        Burst, //not implemented 
+        PumpAction
     }
     [Header("Cosmetic")]
     public ParticleSystem muzzleFlash;
@@ -30,13 +31,18 @@ public class Gun : MonoBehaviour
     public float spreadRange = 0.01f;
     public float range = 1000;
     public float reloadTime = 1f;
+    public int bulletsReloadedPerReload = -1;
     public BulletType bulletType;
+    public GameObject projectilePrefab;
+    public float instantExplosionDistance = 2;
     public FiringType firingType;
+
 
     [Header("Ammo Settings")]
     public int spareAmmo = 100;
-    public int maxAmmo = 10;
-    public int currentAmmo;
+    public int maxMagSize = 10;
+    public int bulletsInMag;
+    public bool bulletInChamber = true;
     public int ammoDrainPerShot = 1;
 
     [Header("Camera Recoil")]
@@ -54,13 +60,28 @@ public class Gun : MonoBehaviour
     public AudioSource weaponAudioSource;
     public AudioClip reloadSound;
     public AudioClip emptyFireSound;
+    public AudioClip pumpSound;
+    public AudioClip pumpReleaseSound;
     public float pitchVariance = 0.1f;
 
     [Header("Box Settings")]
-    public int spareAmmoWhenTakenFromBox = 50;
+    public int spareAmmoWhenTakenFromBox = 50; 
+    [Header("Procedural Reload Settings")]
+    public float pullBackTime = .1f;
+    public float releaseTime = .1f;
+    public float delayTime = .5f;
+    public Transform heldBackPosition;
+    public Transform heldForwardPosition;
+    public GameObject pumpBone; 
+
+    public bool pumpingTheAction = false;
+    public bool pushingTheAction = false;
+    public float pumpTimer = 0;
+    public float pushTimer = 0;
+    public float delayTimer = 0;
 
     //Does not need to be seen
-    [HideInInspector] public bool reloading = false;
+    public bool reloading = false;
     [HideInInspector] public bool coolingDown = false;
 
     //public float firingFrequencyIncreasePerBullet = 0f; //speed up over time?
@@ -72,7 +93,7 @@ public class Gun : MonoBehaviour
 
     private void Start()
     {
-        currentAmmo = maxAmmo; 
+        bulletsInMag = maxMagSize; 
     }
 
     public GameObject crosshair;
@@ -88,38 +109,198 @@ public class Gun : MonoBehaviour
     public void Reload()
     {
         reloading = true;
-        PlayReloadSound();
-
-        
+        PlayLoadShellSound();
+        /*if (firingType == FiringType.PumpAction)
+        {
+            PlayLoadShellSound();
+        }
+        else
+        { 
+            PlayReloadSound();
+        }*/
+    }
+    private void PlayLoadShellSound()
+    { 
+        float defaultPitch = 1;
+        weaponAudioSource.pitch = defaultPitch + Random.Range(-pitchVariance, pitchVariance);
+        weaponAudioSource.PlayOneShot(reloadSound, 1f);
     }
     public void PlayReloadSound()
     {
         float defaultPitch = 1;
         weaponAudioSource.pitch = defaultPitch + Random.Range(-pitchVariance, pitchVariance); 
-        weaponAudioSource.PlayOneShot(reloadSound, 1f);
+        weaponAudioSource.PlayOneShot(pumpSound, 1f);
+    }
+    public void PlayReloadSoundPart2()
+    {
+        float defaultPitch = 1;
+        weaponAudioSource.pitch = defaultPitch + Random.Range(-pitchVariance, pitchVariance);
+        weaponAudioSource.PlayOneShot(pumpReleaseSound, 1f);
     }
     public void FinishReload()
     {
-        while (currentAmmo < maxAmmo && spareAmmo > 0)
+        if (bulletsReloadedPerReload == -1)
         {
-            currentAmmo++;
-            spareAmmo--;
+            while (bulletsInMag < maxMagSize && spareAmmo > 0)
+            {
+                bulletsInMag++;
+                spareAmmo--;
+            }
         }
+        else
+        {
+            for (int i = 0; i < bulletsReloadedPerReload; i++)
+            {
+                if (bulletsInMag < maxMagSize && spareAmmo > 0)
+                {
+                    bulletsInMag++;
+                    spareAmmo--;
+                }
+            }
+        }
+        
         reloading = false;
         dryFired = false;
-        WeaponSwitcher.Instance.reloadTimer = 0;
-        WeaponSwitcher.Instance.backwardsTimer = 0;
+        returningMag = false;
+        reloadTimer = 0;
+        backwardsTimer = 0;
+        delayTimer = 0;
     }
+    public void PumpAction()
+    {
+        pumpingTheAction = true;
+        pushingTheAction = false;
+        PlayReloadSound();
+    }
+    public void ReleaseTheAction()
+    {
+        pumpingTheAction = false;
+        pushingTheAction = true;
+        PlayReloadSoundPart2();
+    }
+    public void FinishPumpingAction()
+    { 
+        bulletInChamber = true;
+        pumpTimer = 0;
+        pushTimer = 0;
+
+        pumpingTheAction = false;
+        pushingTheAction = false;
+    }
+    private void GoldenEyeReload()
+    {
+        float halfTime = reloadTime / 2;
+        if (reloading && reloadTimer < halfTime)
+        {
+            reloadTimer += Time.deltaTime;
+            float normalizedTime = reloadTimer / halfTime; // will = 1
+            transform.position = Vector3.Lerp(WeaponSwitcher.Instance.gunNormalPos.position, WeaponSwitcher.Instance.loweredPosition.position, normalizedTime); //return to zero based on return speed 
+        }
+        else if (reloading && reloadTimer >= halfTime && backwardsTimer < halfTime)
+        {
+            backwardsTimer += Time.deltaTime;
+            float normalizedTime = backwardsTimer / halfTime; // will = 1
+            transform.position = Vector3.Lerp(WeaponSwitcher.Instance.loweredPosition.position, WeaponSwitcher.Instance.gunNormalPos.position, normalizedTime); //return to zero based on return speed 
+        }
+        else if (reloading && backwardsTimer >= halfTime)
+        {
+            FinishReload();
+        }
+    }
+    private void Update()
+    {
+        if (firingType == FiringType.PumpAction)
+        {
+            if (reloading)
+            {
+                GoldenEyeReload();
+            }
+            else
+            {
+                if (pumpingTheAction && pumpTimer < pullBackTime)
+                {
+                    pumpTimer += Time.deltaTime;
+                    float normalizedTime = pumpTimer / pullBackTime; // will = 1
+                    pumpBone.transform.position = Vector3.Lerp(heldForwardPosition.position, heldBackPosition.position, normalizedTime); //return to zero based on return speed 
+                }
+                else if (pushingTheAction && pumpTimer >= pullBackTime && pushTimer < releaseTime)
+                {
+                    pushTimer += Time.deltaTime;
+                    float normalizedTime = pushTimer / releaseTime; // will = 1
+                    pumpBone.transform.position = Vector3.Lerp(heldBackPosition.position, heldForwardPosition.position, normalizedTime); //return to zero based on return speed 
+                }
+                else if (pushingTheAction && pushTimer >= releaseTime)
+                {
+                    FinishPumpingAction();
+                }
+            }  
+        }
+        else if (reloading)
+        {
+            GoldenEyeReload();
+            /*if (reloadTimer < pullBackTime)
+            {
+                reloadTimer += Time.deltaTime;
+                float normalizedTime = reloadTimer / pullBackTime; // will = 1
+                pumpBone.transform.position = Vector3.Lerp(heldForwardPosition.position, heldBackPosition.position, normalizedTime); //return to zero based on return speed  
+            }
+            else if (delayTimer < delayTime)
+            {
+                delayTimer += Time.deltaTime;
+            }
+            else if (backwardsTimer < releaseTime)
+            {
+                if (!returningMag)
+                {
+                    PlayReloadSoundPart2();
+                    returningMag = true;
+                }
+                backwardsTimer += Time.deltaTime;
+                float normalizedTime = backwardsTimer / releaseTime; // will = 1
+                pumpBone.transform.position = Vector3.Lerp(heldBackPosition.position, heldForwardPosition.position, normalizedTime); //return to zero based on return speed  
+            }
+            else
+            { 
+                FinishReload();
+            } */
+        } 
+    }
+    public float reloadTimer = 0;
+    public float backwardsTimer = 0;
+    public bool returningMag = false;
     public void Shoot(bool raycast = true)
     {
         CancelInvoke("TreatAsNotFiring");
         WeaponSwitcher.Instance.firing = true;
         Invoke("TreatAsNotFiring", 0.1f);
 
-        currentAmmo -= ammoDrainPerShot;
 
+        //fire bullet in chamber
+        bulletInChamber = false;
+        switch (firingType)
+        {
+            case FiringType.Single: 
+            case FiringType.Automatic:
+                bulletInChamber = true;
+                bulletsInMag -= ammoDrainPerShot;
+                break;
+            case FiringType.Charge:
+                break;
+            case FiringType.Burst:
+                break;
+            case FiringType.PumpAction:
+                bulletsInMag -= ammoDrainPerShot;
+                break;
+            default:
+                break;
+        }
+
+        //cosmetics
         Recoil.Instance.RecoilFire();
         Jolt.Instance.FireJolt();
+        if (muzzleFlash != null) muzzleFlash.Play();
+        PlayShootSound();
+        //
 
         Vector3 bulletOrigin;
         if (muzzleFlash != null)
@@ -132,39 +313,62 @@ public class Gun : MonoBehaviour
         }
         for (int i = 0; i < bulletsPerShot; i++) //fire bullets
         {
-            Vector3 shootDirection = transform.forward + new Vector3(Random.Range(-spreadRange, spreadRange), Random.Range(-spreadRange, spreadRange), 0);
+            Vector3 shootDirection = transform.forward + new Vector3(Random.Range(-spreadRange, spreadRange), Random.Range(-spreadRange, spreadRange), Random.Range(-spreadRange, spreadRange));
             shootDirection.Normalize();
-            Ray ray = new Ray(transform.position, shootDirection);
-            RaycastHit hit; //otherwise, make raycast
 
-            if (Physics.Raycast(ray, out hit, range, WeaponSwitcher.Instance.canHitLayerMask)) //if raycast hits something  
+            switch (bulletType)
             {
-                GameObject bullet = Instantiate(fakeBulletPrefab, bulletOrigin, Quaternion.identity); //uses muzzle flash as starting pos
-                bullet.transform.forward = shootDirection; //face direction
+                case BulletType.Raycast:
+                    Ray ray = new Ray(transform.position, shootDirection);
+                    RaycastHit hit; //otherwise, make raycast
 
-                StartCoroutine(SpawnBulletCosmetic(bullet, hit.point, true, hit.normal)); 
+                    if (Physics.Raycast(ray, out hit, range, WeaponSwitcher.Instance.canHitLayerMask)) //if raycast hits something  
+                    {
+                        GameObject bullet = Instantiate(fakeBulletPrefab, bulletOrigin, Quaternion.identity); //uses muzzle flash as starting pos
+                        bullet.transform.forward = shootDirection; //face direction
 
-                if (hit.rigidbody != null) //shooting rigidbodies pushes them because it's fun
-                {
-                    hit.rigidbody.AddForceAtPosition(shootDirection * bulletForce, hit.point);
-                    //hit.rigidbody.AddForce(-hit.normal * bulletForce);
-                }
+                        StartCoroutine(SpawnBulletCosmetic(bullet, hit.point, true, hit.normal));
 
-                DamageableHitbox hitbox = hit.transform.GetComponent<DamageableHitbox>(); //get target component 
-                if (hitbox != null) //if target exists
-                {
-                    hitbox.TakeDamage(bulletDamage); //call target damage function
-                }
-            }
-            else //if raycast doesn't hit, still fire a fake bullet
-            {
+                        if (hit.rigidbody != null) //shooting rigidbodies pushes them because it's fun
+                        {
+                            hit.rigidbody.AddForceAtPosition(shootDirection * bulletForce, hit.point);
+                            //hit.rigidbody.AddForce(-hit.normal * bulletForce);
+                        }
 
-                GameObject bullet = Instantiate(fakeBulletPrefab, bulletOrigin, Quaternion.identity); //uses muzzle flash as starting pos
-                StartCoroutine(SpawnBulletCosmetic(bullet, shootDirection * range, false, Vector3.zero)); 
-            }
+                        DamageableHitbox hitbox = hit.transform.GetComponent<DamageableHitbox>(); //get target component 
+                        if (hitbox != null) //if target exists
+                        {
+                            hitbox.TakeDamage(bulletDamage); //call target damage function
+                        }
+                    }
+                    else //if raycast doesn't hit, still fire a fake bullet
+                    {
+                        GameObject bullet = Instantiate(fakeBulletPrefab, bulletOrigin, Quaternion.identity); //uses muzzle flash as starting pos
+                        StartCoroutine(SpawnBulletCosmetic(bullet, shootDirection * range, false, Vector3.zero));
+                    }
+                    break;
+                case BulletType.Projectile:
+
+                    GameObject projectile = Instantiate(projectilePrefab, bulletOrigin, Quaternion.identity);
+                    Rigidbody rigid = projectile.GetComponent<Rigidbody>();
+                    ImpactProjectile impact = projectile.GetComponent<ImpactProjectile>();
+
+                    Ray ray2 = new Ray(transform.position, shootDirection);
+                    RaycastHit hit2;  
+                    if (Physics.Raycast(ray2, out hit2, instantExplosionDistance, WeaponSwitcher.Instance.canHitLayerMask)) //if raycast hits something  
+                    {
+                        impact.transform.position = hit2.point;
+                        impact.Explode(impact.transform.position, impact.damageRadius);
+                    }
+                    else
+                    { 
+                        rigid.AddForce(shootDirection * bulletForce);
+                    }
+                    break;
+                default:
+                    break;
+            } 
         }
-        if (muzzleFlash != null) muzzleFlash.Play();
-        PlayShootSound();
 
         coolingDown = true;
         Invoke("FinishCooldown", firingFrequency);

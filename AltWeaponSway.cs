@@ -54,7 +54,7 @@ public class AltWeaponSway : MonoBehaviour
     }
     private void Sway()
     {
-        if (!WeaponSwitcher.Instance.firing && PlayerMovement.Instance.isGrounded && !WeaponSwitcher.Instance.activeWeapon.reloading)
+        if (!WeaponSwitcher.Instance.firing && PlayerMovement.Instance.isGrounded)//&& !WeaponSwitcher.Instance.activeWeapon.reloading
         {
             timer += Time.deltaTime;
 
