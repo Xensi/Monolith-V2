@@ -277,7 +277,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &973773674
 Transform:
   m_ObjectHideFlags: 0
@@ -317,12 +317,15 @@ MonoBehaviour:
   spreadRange: 0.05
   range: 1000
   reloadTime: 4
+  bulletsReloadedPerReload: -1
   bulletType: 0
   projectilePrefab: {fileID: 0}
+  instantExplosionDistance: 2
   firingType: 1
   spareAmmo: 400
-  maxAmmo: 100
-  currentAmmo: 0
+  maxMagSize: 10
+  bulletsInMag: 0
+  bulletInChamber: 1
   ammoDrainPerShot: 1
   recoilX: -2
   recoilY: 2
@@ -339,12 +342,28 @@ MonoBehaviour:
   weaponAudioSource: {fileID: 951083959840614904}
   reloadSound: {fileID: 8300000, guid: 6a32a0d49cd240b4cb9934adf37a49a5, type: 3}
   emptyFireSound: {fileID: 0}
+  pumpSound: {fileID: 0}
+  pumpReleaseSound: {fileID: 0}
   pitchVariance: 0.1
   spareAmmoWhenTakenFromBox: 50
+  pullBackTime: 0.1
+  releaseTime: 0.1
+  delayTime: 0.5
+  heldBackPosition: {fileID: 0}
+  heldForwardPosition: {fileID: 0}
+  pumpBone: {fileID: 0}
+  pumpingTheAction: 0
+  pushingTheAction: 0
+  pumpTimer: 0
+  pushTimer: 0
+  delayTimer: 0
   reloading: 0
   coolingDown: 0
   dryFired: 0
   crosshair: {fileID: 0}
+  reloadTimer: 0
+  backwardsTimer: 0
+  returningMag: 0
 --- !u!1 &397932267578669314
 GameObject:
   m_ObjectHideFlags: 0
@@ -740,12 +759,15 @@ MonoBehaviour:
   spreadRange: 0.025
   range: 1000
   reloadTime: 1
+  bulletsReloadedPerReload: -1
   bulletType: 0
   projectilePrefab: {fileID: 0}
+  instantExplosionDistance: 2
   firingType: 0
   spareAmmo: 50
-  maxAmmo: 8
-  currentAmmo: 0
+  maxMagSize: 10
+  bulletsInMag: 0
+  bulletInChamber: 1
   ammoDrainPerShot: 1
   recoilX: -2
   recoilY: 0.35
@@ -759,12 +781,28 @@ MonoBehaviour:
   weaponAudioSource: {fileID: 951083959840614904}
   reloadSound: {fileID: 8300000, guid: 6417becf7435db24ebcdd7f2058a7157, type: 3}
   emptyFireSound: {fileID: 8300000, guid: ace2f75dc23f7f04fbd0c37a23d702bc, type: 3}
+  pumpSound: {fileID: 0}
+  pumpReleaseSound: {fileID: 0}
   pitchVariance: 0.05
   spareAmmoWhenTakenFromBox: 50
+  pullBackTime: 0.1
+  releaseTime: 0.1
+  delayTime: 0.5
+  heldBackPosition: {fileID: 0}
+  heldForwardPosition: {fileID: 0}
+  pumpBone: {fileID: 0}
+  pumpingTheAction: 0
+  pushingTheAction: 0
+  pumpTimer: 0
+  pushTimer: 0
+  delayTimer: 0
   reloading: 0
   coolingDown: 0
   dryFired: 0
   crosshair: {fileID: 0}
+  reloadTimer: 0
+  backwardsTimer: 0
+  returningMag: 0
 --- !u!1 &951083960584111148
 GameObject:
   m_ObjectHideFlags: 0
@@ -931,12 +969,15 @@ MonoBehaviour:
   spreadRange: 0.15
   range: 1000
   reloadTime: 2
+  bulletsReloadedPerReload: -1
   bulletType: 0
   projectilePrefab: {fileID: 0}
+  instantExplosionDistance: 2
   firingType: 0
   spareAmmo: 50
-  maxAmmo: 4
-  currentAmmo: 0
+  maxMagSize: 10
+  bulletsInMag: 0
+  bulletInChamber: 1
   ammoDrainPerShot: 1
   recoilX: -10
   recoilY: 2
@@ -953,12 +994,28 @@ MonoBehaviour:
   weaponAudioSource: {fileID: 951083959840614904}
   reloadSound: {fileID: 8300000, guid: 6a32a0d49cd240b4cb9934adf37a49a5, type: 3}
   emptyFireSound: {fileID: 0}
+  pumpSound: {fileID: 0}
+  pumpReleaseSound: {fileID: 0}
   pitchVariance: 0.1
   spareAmmoWhenTakenFromBox: 50
+  pullBackTime: 0.1
+  releaseTime: 0.1
+  delayTime: 0.5
+  heldBackPosition: {fileID: 0}
+  heldForwardPosition: {fileID: 0}
+  pumpBone: {fileID: 0}
+  pumpingTheAction: 0
+  pushingTheAction: 0
+  pumpTimer: 0
+  pushTimer: 0
+  delayTimer: 0
   reloading: 0
   coolingDown: 0
   dryFired: 0
   crosshair: {fileID: 0}
+  reloadTimer: 0
+  backwardsTimer: 0
+  returningMag: 0
 --- !u!1 &951083960955008722
 GameObject:
   m_ObjectHideFlags: 0
@@ -1394,12 +1451,15 @@ MonoBehaviour:
   spreadRange: 0.01
   range: 1000
   reloadTime: 2.5
+  bulletsReloadedPerReload: -1
   bulletType: 0
   projectilePrefab: {fileID: 0}
+  instantExplosionDistance: 2
   firingType: 0
   spareAmmo: 100
-  maxAmmo: 5
-  currentAmmo: 0
+  maxMagSize: 10
+  bulletsInMag: 0
+  bulletInChamber: 1
   ammoDrainPerShot: 1
   recoilX: -16
   recoilY: 2
@@ -1416,12 +1476,28 @@ MonoBehaviour:
   weaponAudioSource: {fileID: 951083959840614904}
   reloadSound: {fileID: 8300000, guid: 0eb673dc31e22fd4a8f158be386c8053, type: 3}
   emptyFireSound: {fileID: 0}
+  pumpSound: {fileID: 0}
+  pumpReleaseSound: {fileID: 0}
   pitchVariance: 0.1
   spareAmmoWhenTakenFromBox: 50
+  pullBackTime: 0.1
+  releaseTime: 0.1
+  delayTime: 0.5
+  heldBackPosition: {fileID: 0}
+  heldForwardPosition: {fileID: 0}
+  pumpBone: {fileID: 0}
+  pumpingTheAction: 0
+  pushingTheAction: 0
+  pumpTimer: 0
+  pushTimer: 0
+  delayTimer: 0
   reloading: 0
   coolingDown: 0
   dryFired: 0
   crosshair: {fileID: 0}
+  reloadTimer: 0
+  backwardsTimer: 0
+  returningMag: 0
 --- !u!1 &951083961684597720
 GameObject:
   m_ObjectHideFlags: 0
@@ -1479,12 +1555,15 @@ MonoBehaviour:
   spreadRange: 0.05
   range: 1000
   reloadTime: 1
+  bulletsReloadedPerReload: -1
   bulletType: 0
   projectilePrefab: {fileID: 0}
+  instantExplosionDistance: 2
   firingType: 1
   spareAmmo: 100
-  maxAmmo: 20
-  currentAmmo: 0
+  maxMagSize: 10
+  bulletsInMag: 0
+  bulletInChamber: 1
   ammoDrainPerShot: 1
   recoilX: -2
   recoilY: 2
@@ -1498,12 +1577,28 @@ MonoBehaviour:
   weaponAudioSource: {fileID: 951083959840614904}
   reloadSound: {fileID: 8300000, guid: 6417becf7435db24ebcdd7f2058a7157, type: 3}
   emptyFireSound: {fileID: 8300000, guid: ace2f75dc23f7f04fbd0c37a23d702bc, type: 3}
+  pumpSound: {fileID: 0}
+  pumpReleaseSound: {fileID: 0}
   pitchVariance: 0.1
   spareAmmoWhenTakenFromBox: 50
+  pullBackTime: 0.1
+  releaseTime: 0.1
+  delayTime: 0.5
+  heldBackPosition: {fileID: 0}
+  heldForwardPosition: {fileID: 0}
+  pumpBone: {fileID: 0}
+  pumpingTheAction: 0
+  pushingTheAction: 0
+  pumpTimer: 0
+  pushTimer: 0
+  delayTimer: 0
   reloading: 0
   coolingDown: 0
   dryFired: 0
   crosshair: {fileID: 0}
+  reloadTimer: 0
+  backwardsTimer: 0
+  returningMag: 0
 --- !u!1 &2268671610367876631
 GameObject:
   m_ObjectHideFlags: 0
@@ -1561,12 +1656,15 @@ MonoBehaviour:
   spreadRange: 0.05
   range: 1000
   reloadTime: 4
+  bulletsReloadedPerReload: -1
   bulletType: 0
   projectilePrefab: {fileID: 0}
+  instantExplosionDistance: 2
   firingType: 1
   spareAmmo: 400
-  maxAmmo: 100
-  currentAmmo: 0
+  maxMagSize: 10
+  bulletsInMag: 0
+  bulletInChamber: 1
   ammoDrainPerShot: 1
   recoilX: -2
   recoilY: 2
@@ -1583,12 +1681,28 @@ MonoBehaviour:
   weaponAudioSource: {fileID: 951083959840614904}
   reloadSound: {fileID: 8300000, guid: 6a32a0d49cd240b4cb9934adf37a49a5, type: 3}
   emptyFireSound: {fileID: 0}
+  pumpSound: {fileID: 0}
+  pumpReleaseSound: {fileID: 0}
   pitchVariance: 0.1
   spareAmmoWhenTakenFromBox: 50
+  pullBackTime: 0.1
+  releaseTime: 0.1
+  delayTime: 0.5
+  heldBackPosition: {fileID: 0}
+  heldForwardPosition: {fileID: 0}
+  pumpBone: {fileID: 0}
+  pumpingTheAction: 0
+  pushingTheAction: 0
+  pumpTimer: 0
+  pushTimer: 0
+  delayTimer: 0
   reloading: 0
   coolingDown: 0
   dryFired: 0
   crosshair: {fileID: 0}
+  reloadTimer: 0
+  backwardsTimer: 0
+  returningMag: 0
 --- !u!1 &5951035675678841235
 GameObject:
   m_ObjectHideFlags: 0
@@ -1753,7 +1867,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8280473767031764137
 Transform:
   m_ObjectHideFlags: 0
@@ -1794,12 +1908,15 @@ MonoBehaviour:
   spreadRange: 0.05
   range: 1000
   reloadTime: 1
+  bulletsReloadedPerReload: -1
   bulletType: 1
   projectilePrefab: {fileID: 325735990254120536, guid: 038e107c799311749ac06a9356250046, type: 3}
+  instantExplosionDistance: 2
   firingType: 0
   spareAmmo: 10
-  maxAmmo: 1
-  currentAmmo: 0
+  maxMagSize: 10
+  bulletsInMag: 0
+  bulletInChamber: 1
   ammoDrainPerShot: 1
   recoilX: -2
   recoilY: 2
@@ -1816,12 +1933,28 @@ MonoBehaviour:
   weaponAudioSource: {fileID: 951083959840614904}
   reloadSound: {fileID: 8300000, guid: 6a32a0d49cd240b4cb9934adf37a49a5, type: 3}
   emptyFireSound: {fileID: 0}
+  pumpSound: {fileID: 0}
+  pumpReleaseSound: {fileID: 0}
   pitchVariance: 0.1
   spareAmmoWhenTakenFromBox: 50
+  pullBackTime: 0.1
+  releaseTime: 0.1
+  delayTime: 0.5
+  heldBackPosition: {fileID: 0}
+  heldForwardPosition: {fileID: 0}
+  pumpBone: {fileID: 0}
+  pumpingTheAction: 0
+  pushingTheAction: 0
+  pumpTimer: 0
+  pushTimer: 0
+  delayTimer: 0
   reloading: 0
   coolingDown: 0
   dryFired: 0
   crosshair: {fileID: 0}
+  reloadTimer: 0
+  backwardsTimer: 0
+  returningMag: 0
 --- !u!1001 &951083959868375826
 PrefabInstance:
   m_ObjectHideFlags: 0
